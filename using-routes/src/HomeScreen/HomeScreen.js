@@ -1,46 +1,62 @@
-import { useState } from "react";
-import { Button, Text, View } from "react-native";
+// HomeScreen.js
 
-function HomeScreen({ navigation }) {
+import React, { useState } from 'react';
+import { Button, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-  let [quantidadeLista, setQuantidadeLista] = useState("0")
+function HomeScreen() {
+  const navigation = useNavigation();
+  const [quantidadeLista, setQuantidadeLista] = useState(0);
+  const [botoesAdicionais, setBotoesAdicionais] = useState([]);
 
-    const addlist = () => {
-      if (quantidadeLista <= 10) {
-        setQuantidadeLista(quantidadeLista++)
-      } else {
-        alert("Você não pode mais adicionar listas")
+  const addList = () => {
+    if (quantidadeLista < 10) {
+      setQuantidadeLista(quantidadeLista + 1);
+
+      if (quantidadeLista < 10) {
+        const novoBotao = (
+          <Button
+            key={quantidadeLista}
+            title={`Botão ${quantidadeLista}`}
+            onPress={() => {
+              navigation.navigate('ListScreen'); // Navega para a página "ListScreen"
+            }}
+          />
+        );
+        setBotoesAdicionais([...botoesAdicionais, novoBotao]);
+      }
+    } else {
+      alert('Você atingiu o limite de 10 listas');
+    }
+  }
+
+  const deleteList = () => {
+    if (quantidadeLista > 0) {
+      setQuantidadeLista(quantidadeLista - 1);
+
+      if (botoesAdicionais.length > 0) {
+        setBotoesAdicionais(botoesAdicionais.slice(0, -1));
       }
     }
+  }
 
-    const deleteList = () => {
-      if (quantidadeLista >= 0) {
-        setQuantidadeLista(quantidadeLista--)
-      }
-    }
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Suas listas</Text>
 
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Suas listas</Text>
+      {quantidadeLista < 10 && (
+        <Button title="add list" onPress={addList} />
+      )}
 
-        <Button
-                title="add/edit list"
-                onPress={() => navigation.navigate('Adicionar Lista')}
-            />
+      {botoesAdicionais.length > 0 && (
+        <Button title="delete list" onPress={deleteList} />
+      )}
 
-            <Button
-                title="add list"
-                onPress={addlist}
-            />
+      <Text>Você tem {quantidadeLista}/10</Text>
 
-            <Button
-                title="delete list"
-                onPress={deleteList}
-            />
+      {botoesAdicionais.map((botao) => botao)}
+    </View>
+  );
+}
 
-        <Text>Você tem {quantidadeLista}/10</Text>
-      </View>
-    );
-  } 
-
-  export default HomeScreen;
+export default HomeScreen;
