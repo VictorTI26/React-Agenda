@@ -55,7 +55,7 @@ function HomeScreen() {
         <View key={lista.id} style={{ marginTop: 10, width: '20%' }}>
           <Button
             title={lista.nome}
-            onPress={() => navigation.navigate('ListScreen', { nomeLista: lista.nome })}
+            onPress={() => navigation.navigate('ADD list', { nomeLista: lista.nome })}
           />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
             <Button title="Editar" onPress={() => editList(index)} />
