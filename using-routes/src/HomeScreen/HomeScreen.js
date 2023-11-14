@@ -52,7 +52,7 @@ function HomeScreen() {
       <Button title={editandoIndex !== null ? "Salvar alteração" : "Adicionar Lista"} onPress={addOrEditList} />
 
       {listas.map((lista, index) => (
-        <View key={lista.id} style={{ marginTop: 10, width: '15%' }}>
+        <View key={lista.id} style={{ marginTop: 10, width: '20%' }}>
           <Button
             title={lista.nome}
             onPress={() => navigation.navigate('ListScreen', { nomeLista: lista.nome })}
