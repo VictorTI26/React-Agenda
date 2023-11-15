@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Text, View, TextInput, FlatList } from "react-native";
+import { Button, Text, View, TextInput, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function ListScreen({ route }) {
@@ -22,7 +22,7 @@ function ListScreen({ route }) {
     };
 
     carregarItens();
-  }, []);
+  }, [nomeLista]);
 
   const adicionarItem = async () => {
     if (nomeItem.trim() === '') {
@@ -30,16 +30,22 @@ function ListScreen({ route }) {
       return;
     }
 
+    const dataHoraCriacao = new Date().toLocaleString(); // Obtém a data/hora atual como string
+
     let novosItens;
     if (editandoIndex !== null) {
       const itensAtualizados = [...itens];
       itensAtualizados[editandoIndex] = {
         nome: nomeItem,
         descricao: descricaoItem,
+        dataHoraCriacao,
       };
       novosItens = itensAtualizados;
     } else {
-      novosItens = [...itens, { nome: nomeItem, descricao: descricaoItem }];
+      novosItens = [
+        ...itens,
+        { nome: nomeItem, descricao: descricaoItem, dataHoraCriacao },
+      ];
     }
 
     setNomeItem('');
@@ -95,6 +101,7 @@ function ListScreen({ route }) {
           <View style={{ marginTop: 10, width: '80%' }}>
             <Text>Nome: {item.nome}</Text>
             <Text>Descrição: {item.descricao}</Text>
+            <Text>Data de Criação: {item.dataHoraCriacao}</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
               <Button title="Editar" onPress={() => editarItem(index)} />
               <Button title="Excluir" onPress={() => excluirItem(index)} />

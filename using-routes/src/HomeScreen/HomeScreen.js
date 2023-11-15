@@ -91,7 +91,7 @@ function HomeScreen() {
             onPress={() => navigation.navigate('ADD list', { nomeLista: lista.nome })}
           />
           <Text>Data de Criação: {lista.dataHoraCriacao}</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+          <View style={{ flexDirection: 'row', marginTop: 5 }}>
             <Button title="Editar" onPress={() => editList(index)} />
             <Button title="Excluir" onPress={() => deleteList(index)} />
           </View>
