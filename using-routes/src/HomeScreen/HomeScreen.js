@@ -24,11 +24,13 @@ function HomeScreen() {
     carregarListas();
   }, []);
 
-  const addEditList = async () => { 
+  const addEditList = async () => {
     if (nomeLista.trim() === '') {
       alert('Digite um nome para a lista');
       return;
     }
+
+    const dataHoraCriacao = new Date().toLocaleString(); // Obtém a data/hora atual
 
     let novasListas;
     if (editandoIndex !== null) {
@@ -37,7 +39,7 @@ function HomeScreen() {
       novasListas = listasAtualizadas;
     } else {
       if (listas.length < 10) {
-        novasListas = [...listas, { id: listas.length, nome: nomeLista }];
+        novasListas = [...listas, { id: listas.length, nome: nomeLista, dataHoraCriacao }];
       } else {
         alert('Você atingiu o limite de 10 listas');
         return;
@@ -55,7 +57,7 @@ function HomeScreen() {
     }
   };
 
-  const deleteList = async (index) => { 
+  const deleteList = async (index) => {
     const listasAtualizadas = listas.filter((_, i) => i !== index);
     try {
       await AsyncStorage.setItem('listas', JSON.stringify(listasAtualizadas));
@@ -88,6 +90,7 @@ function HomeScreen() {
             title={lista.nome}
             onPress={() => navigation.navigate('ADD list', { nomeLista: lista.nome })}
           />
+          <Text>Data de Criação: {lista.dataHoraCriacao}</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
             <Button title="Editar" onPress={() => editList(index)} />
             <Button title="Excluir" onPress={() => deleteList(index)} />
