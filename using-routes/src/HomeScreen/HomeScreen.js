@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Text, View, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -8,35 +9,65 @@ function HomeScreen() {
   const [nomeLista, setNomeLista] = useState('');
   const [editandoIndex, setEditandoIndex] = useState(null);
 
-  const addOrEditList = () => {
+  useEffect(() => {
+    const carregarListas = async () => {
+      try {
+        const listasSalvas = await AsyncStorage.getItem('listas');
+        if (listasSalvas !== null) {
+          setListas(JSON.parse(listasSalvas));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar listas:', error);
+      }
+    };
+
+    carregarListas();
+  }, []);
+
+  const addEditList = async () => { 
     if (nomeLista.trim() === '') {
       alert('Digite um nome para a lista');
       return;
     }
 
+    let novasListas;
     if (editandoIndex !== null) {
       const listasAtualizadas = [...listas];
-      listasAtualizadas[editandoIndex].nome = nomeLista;
-      setListas(listasAtualizadas);
-      setEditandoIndex(null);
+      listasAtualizadas[editandoIndex] = { ...listasAtualizadas[editandoIndex], nome: nomeLista };
+      novasListas = listasAtualizadas;
     } else {
       if (listas.length < 10) {
-        setListas([...listas, { id: listas.length, nome: nomeLista }]);
+        novasListas = [...listas, { id: listas.length, nome: nomeLista }];
       } else {
         alert('Você atingiu o limite de 10 listas');
+        return;
       }
     }
 
     setNomeLista('');
+    setEditandoIndex(null);
+
+    try {
+      await AsyncStorage.setItem('listas', JSON.stringify(novasListas));
+      setListas(novasListas);
+    } catch (error) {
+      console.error('Erro ao salvar listas:', error);
+    }
+  };
+
+  const deleteList = async (index) => { 
+    const listasAtualizadas = listas.filter((_, i) => i !== index);
+    try {
+      await AsyncStorage.setItem('listas', JSON.stringify(listasAtualizadas));
+      setListas(listasAtualizadas);
+    } catch (error) {
+      console.error('Erro ao atualizar listas:', error);
+    }
   };
 
   const editList = (index) => {
     setNomeLista(listas[index].nome);
     setEditandoIndex(index);
-  };
-
-  const deleteList = (index) => {
-    setListas(listas.filter((_, i) => i !== index));
   };
 
   return (
@@ -49,7 +80,7 @@ function HomeScreen() {
         style={{ marginBottom: 10, borderWidth: 1, borderColor: 'gray', padding: 5 }}
       />
 
-      <Button title={editandoIndex !== null ? "Salvar alteração" : "Adicionar Lista"} onPress={addOrEditList} />
+      <Button title={editandoIndex !== null ? "Salvar alteração" : "Adicionar Lista"} onPress={addEditList} />
 
       {listas.map((lista, index) => (
         <View key={lista.id} style={{ marginTop: 10, width: '20%' }}>

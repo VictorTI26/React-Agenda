@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Text, View, TextInput, FlatList } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function ListScreen({ route }) {
   const { nomeLista } = route.params;
@@ -8,32 +9,59 @@ function ListScreen({ route }) {
   const [descricaoItem, setDescricaoItem] = useState('');
   const [editandoIndex, setEditandoIndex] = useState(null);
 
-  const adicionarItem = () => {
+  useEffect(() => {
+    const carregarItens = async () => {
+      try {
+        const itensSalvos = await AsyncStorage.getItem(nomeLista);
+        if (itensSalvos !== null) {
+          setItens(JSON.parse(itensSalvos));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar itens:', error);
+      }
+    };
+
+    carregarItens();
+  }, []);
+
+  const adicionarItem = async () => {
     if (nomeItem.trim() === '') {
       alert('Digite um nome para o item');
       return;
     }
 
+    let novosItens;
     if (editandoIndex !== null) {
       const itensAtualizados = [...itens];
-      const itemAtualizado = {
+      itensAtualizados[editandoIndex] = {
         nome: nomeItem,
         descricao: descricaoItem,
       };
-      itensAtualizados[editandoIndex] = itemAtualizado;
-      setItens(itensAtualizados);
-      setEditandoIndex(null);
+      novosItens = itensAtualizados;
     } else {
-      const newItem = {
-        nome: nomeItem,
-        descricao: descricaoItem,
-      };
-
-      setItens([...itens, newItem]);
+      novosItens = [...itens, { nome: nomeItem, descricao: descricaoItem }];
     }
 
     setNomeItem('');
     setDescricaoItem('');
+    setEditandoIndex(null);
+
+    try {
+      await AsyncStorage.setItem(nomeLista, JSON.stringify(novosItens));
+      setItens(novosItens);
+    } catch (error) {
+      console.error('Erro ao salvar itens:', error);
+    }
+  };
+
+  const excluirItem = async (index) => {
+    const itensAtualizados = itens.filter((_, i) => i !== index);
+    try {
+      await AsyncStorage.setItem(nomeLista, JSON.stringify(itensAtualizados));
+      setItens(itensAtualizados);
+    } catch (error) {
+      console.error('Erro ao atualizar itens:', error);
+    }
   };
 
   const editarItem = (index) => {
@@ -41,11 +69,6 @@ function ListScreen({ route }) {
     setNomeItem(itemSelecionado.nome);
     setDescricaoItem(itemSelecionado.descricao);
     setEditandoIndex(index);
-  };
-
-  const excluirItem = (index) => {
-    const itensAtualizados = itens.filter((_, i) => i !== index);
-    setItens(itensAtualizados);
   };
 
   return (
