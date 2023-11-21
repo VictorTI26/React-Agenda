@@ -3,13 +3,14 @@ import { Button, Text, View, TextInput, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function ListScreen({ route }) {
-  const { nomeLista } = route.params;
-  const [itens, setItens] = useState([]);
-  const [nomeItem, setNomeItem] = useState('');
-  const [descricaoItem, setDescricaoItem] = useState('');
-  const [editandoIndex, setEditandoIndex] = useState(null);
+  const { nomeLista } = route.params; // Obtém o nome da lista da navegação
+  const [itens, setItens] = useState([]); // Estado para armazenar a lista de itens
+  const [nomeItem, setNomeItem] = useState(''); // Estado para armazenar o nome do novo item
+  const [descricaoItem, setDescricaoItem] = useState(''); // Estado para armazenar a descrição do novo item
+  const [editandoIndex, setEditandoIndex] = useState(null); // Estado para rastrear o índice do item em edição
 
   useEffect(() => {
+    // Efeito colateral para carregar os itens salvos ao montar o componente
     const carregarItens = async () => {
       try {
         const itensSalvos = await AsyncStorage.getItem(nomeLista);
@@ -22,9 +23,10 @@ function ListScreen({ route }) {
     };
 
     carregarItens();
-  }, [nomeLista]);
+  }, [nomeLista]); // O efeito será executado sempre que o nome da lista for alterado
 
   const adicionarItem = async () => {
+    // Função para adicionar ou editar um item na lista
     if (nomeItem.trim() === '') {
       alert('Digite um nome para o item');
       return;
@@ -34,6 +36,7 @@ function ListScreen({ route }) {
 
     let novosItens;
     if (editandoIndex !== null) {
+      // Editando item existente
       const itensAtualizados = [...itens];
       itensAtualizados[editandoIndex] = {
         nome: nomeItem,
@@ -42,6 +45,7 @@ function ListScreen({ route }) {
       };
       novosItens = itensAtualizados;
     } else {
+      // Adicionando novo item
       novosItens = [
         ...itens,
         { nome: nomeItem, descricao: descricaoItem, dataHoraCriacao },
@@ -61,6 +65,7 @@ function ListScreen({ route }) {
   };
 
   const excluirItem = async (index) => {
+    // Função para excluir um item da lista
     const itensAtualizados = itens.filter((_, i) => i !== index);
     try {
       await AsyncStorage.setItem(nomeLista, JSON.stringify(itensAtualizados));
@@ -71,6 +76,7 @@ function ListScreen({ route }) {
   };
 
   const editarItem = (index) => {
+    // Função para iniciar a edição de um item
     const itemSelecionado = itens[index];
     setNomeItem(itemSelecionado.nome);
     setDescricaoItem(itemSelecionado.descricao);
@@ -98,6 +104,7 @@ function ListScreen({ route }) {
         data={itens}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
+          // Renderiza cada item da lista usando FlatList
           <View style={{ marginTop: 10, width: '80%' }}>
             <Text>Nome: {item.nome}</Text>
             <Text>Descrição: {item.descricao}</Text>

@@ -5,11 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function HomeScreen() {
   const navigation = useNavigation();
-  const [listas, setListas] = useState([]);
-  const [nomeLista, setNomeLista] = useState('');
-  const [editandoIndex, setEditandoIndex] = useState(null);
+  const [listas, setListas] = useState([]); // Estado para armazenar a lista de tarefas
+  const [nomeLista, setNomeLista] = useState(''); // Estado para armazenar o nome da nova tarefa
+  const [editandoIndex, setEditandoIndex] = useState(null); // Estado para rastrear o índice da tarefa em edição
 
   useEffect(() => {
+    // Efeito colateral para carregar as listas salvas ao montar o componente
     const carregarListas = async () => {
       try {
         const listasSalvas = await AsyncStorage.getItem('listas');
@@ -22,9 +23,10 @@ function HomeScreen() {
     };
 
     carregarListas();
-  }, []);
+  }, []); // O segundo parâmetro vazio assegura que o efeito seja executado apenas uma vez na montagem
 
   const addEditList = async () => {
+    // Função para adicionar ou editar uma tarefa na lista
     if (nomeLista.trim() === '') {
       alert('Digite um nome para a lista');
       return;
@@ -34,10 +36,12 @@ function HomeScreen() {
 
     let novasListas;
     if (editandoIndex !== null) {
+      // Editando tarefa existente
       const listasAtualizadas = [...listas];
       listasAtualizadas[editandoIndex] = { ...listasAtualizadas[editandoIndex], nome: nomeLista };
       novasListas = listasAtualizadas;
     } else {
+      // Adicionando nova tarefa
       if (listas.length < 10) {
         novasListas = [...listas, { id: listas.length, nome: nomeLista, dataHoraCriacao }];
       } else {
@@ -58,6 +62,7 @@ function HomeScreen() {
   };
 
   const deleteList = async (index) => {
+    // Função para excluir uma tarefa da lista
     const listasAtualizadas = listas.filter((_, i) => i !== index);
     try {
       await AsyncStorage.setItem('listas', JSON.stringify(listasAtualizadas));
@@ -68,6 +73,7 @@ function HomeScreen() {
   };
 
   const editList = (index) => {
+    // Função para iniciar a edição de uma tarefa
     setNomeLista(listas[index].nome);
     setEditandoIndex(index);
   };
@@ -85,6 +91,7 @@ function HomeScreen() {
       <Button title={editandoIndex !== null ? "Salvar alteração" : "Adicionar Lista"} onPress={addEditList} />
 
       {listas.map((lista, index) => (
+        // Mapeia as tarefas para exibir na tela
         <View key={lista.id} style={{ marginTop: 10, width: '20%' }}>
           <Button
             title={lista.nome}
